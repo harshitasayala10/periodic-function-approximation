@@ -1,14 +1,16 @@
 # Periodic Function Approximation with SIREN
 
-Learn a **bounded, periodic** black-box function \(f(x)\) from data, training only on \(x \in [-10\pi, 10\pi]\), and evaluate **extrapolation** outside that range.
+Learn a **bounded, periodic** function \(f(x)\) from data on \(x \in [-10\pi, 10\pi]\), then measure how far the fit survives for \(x\) outside that window.
+
+The submitted model fits the training window and only partly extrapolates. Inside \([-10\pi, 10\pi]\), R² is 1.000. Just outside, R² is 0.67. On the far bands it is 0.49. At \(x = 1100\), far beyond the training edge near \(31.4\), the true value was \(0.82\) and the model predicted \(-0.32\). Sine layers keep the output from flattening. They do not lock onto the unknown period, so the error keeps moving as \(|x|\) grows.
 
 ## Approach (why SIREN)
 
-Standard MLPs with ReLU or Tanh activations do not keep oscillating outside the training interval: ReLU tends toward linear rays; Tanh saturates. A periodic target needs a representation that can continue to oscillate for large \(|x|\).
+ReLU becomes a straight line outside the training inputs. Tanh saturates and stops oscillating. A periodic target needs a representation that can keep moving for large \(|x|\).
 
-**SIREN** (Sitzmann et al., NeurIPS 2020) uses \(\sin(\omega_0 \cdot (Wx + b))\) activations with a carefully designed initialization. Sinusoids oscillate everywhere by construction, so the network can represent periodic structure without hardcoding the unknown period \(T\) or frequency into features or the loss. Frequencies are learned from \((x, f(x))\) pairs only.
+**SIREN** (Sitzmann et al., NeurIPS 2020) uses \(\sin(\omega_0 \cdot (Wx + b))\) with the paper's initialization. Frequencies are learned from \((x, f(x))\) pairs. The period \(T\) is not hardcoded. Among the models compared in the ablation, this was the best joint result: it fits the training window and has the highest R² just outside it. It is not a solution for every real \(x\).
 
-We reject alternatives that either need a known period (periodic GP kernels, hand-built Fourier bases with fixed \(T\)) or fail at extrapolation (vanilla ReLU/Tanh MLPs).
+A periodic Gaussian process or a fixed Fourier basis would need \(T\) set in advance, which the task does not allow. Those options were not used.
 
 **Constraints honored**
 
@@ -129,8 +131,8 @@ Coverage includes sampling domain and strategies, dataset shapes, SIREN forward 
 ## Limitations / failure cases
 
 - **Period mismatch / multi-scale**: if the true \(f\) has very high-frequency content relative to \(\omega_0\) and width, fitting may need more capacity or longer training.
-- **Extrapolation drifts**: on this run, outside-only R² falls from 0.67 just beyond the training window to 0.49 on the far bands. Sine layers keep oscillating, but they are not locked to the unknown period.
-- **Placeholder \(f\)**: results on \(\sin x + 0.5\sin 2x\) are a proxy; the real black box may differ.
+- **Extrapolation drifts**: outside-only R² falls from 0.67 just beyond the training window to 0.49 on the far bands. At \(x = 1100\) the prediction has the wrong sign (\(-0.32\) versus \(0.82\)).
+- **This \(f\) is simple**: \(\sin x + 0.5\sin 2x\) has two frequencies. A target with sharper or less regular oscillations would be harder to fit, including inside the training window.
 - **No period discovery report**: we do not estimate \(T\) explicitly (by design - not hardcoded, not returned).
 
 ## What I would improve
