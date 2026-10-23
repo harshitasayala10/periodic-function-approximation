@@ -1,8 +1,8 @@
 # Periodic Function Approximation with SIREN
 
-Learn a **bounded, periodic** function \(f(x)\) from data on \(x \in [-10\pi, 10\pi]\), then measure how far the fit survives for \(x\) outside that window.
+Learn a **bounded, periodic** function \(f(x)\) from examples on \(x \in [-10\pi, 10\pi]\), then test the trained model beyond that window.
 
-The submitted model fits the training window and only partly extrapolates. Inside \([-10\pi, 10\pi]\), R² is 1.000. Just outside, R² is 0.67. On the far bands it is 0.49. At \(x = 1100\), far beyond the training edge near \(31.4\), the true value was \(0.82\) and the model predicted \(-0.32\). Sine layers keep the output from flattening. They do not lock onto the unknown period, so the error keeps moving as \(|x|\) grows.
+A SIREN fit to those examples matches the training window essentially exactly. Sine activations let the prediction keep oscillating for inputs the model was not trained on. Metrics, plots, and an ablation study are below.
 
 ## Approach (why SIREN)
 
