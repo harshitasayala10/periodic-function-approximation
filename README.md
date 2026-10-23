@@ -1,6 +1,6 @@
 # Periodic Function Approximation with SIREN
 
-Take-home prototype: learn a **bounded, periodic** black-box function \(f(x)\) from data, training only on \(x \in [-10\pi, 10\pi]\), and evaluate **extrapolation** outside that range.
+Learn a **bounded, periodic** black-box function \(f(x)\) from data, training only on \(x \in [-10\pi, 10\pi]\), and evaluate **extrapolation** outside that range.
 
 ## Approach (why SIREN)
 
