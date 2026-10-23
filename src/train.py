@@ -1,5 +1,6 @@
 """Training loop for a SIREN on samples of a periodic function."""
 
+import copy
 import json
 import os
 import random
@@ -155,3 +156,74 @@ def train(
         print(f"\nTraining complete. Best val loss: {best_val_loss:.6f}")
         print(f"Checkpoint: {checkpoint_path}")
     return model
+
+
+def train_model(
+    model: nn.Module,
+    n_epochs: int = 500,
+    n_train: int = 5000,
+    n_val: int = 1000,
+    batch_size: int = 256,
+    learning_rate: float = 1e-4,
+    strategy: str = "stratified",
+    seed: int = 42,
+    device: torch.device = None,
+    verbose: bool = False,
+) -> float:
+    """Train ``model`` in place and restore the best validation weights.
+
+    Same loss, optimizer, and learning-rate schedule as ``train``. The
+    returned model is the checkpoint with the lowest validation MSE, not
+    the weights from the final epoch. ``strategy`` selects the sampler in
+    ``make_dataloaders``.
+    """
+    if device is None:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    set_seed(seed)
+    train_loader, val_loader = make_dataloaders(
+        n_train=n_train,
+        n_val=n_val,
+        strategy=strategy,
+        batch_size=batch_size,
+        seed=seed,
+    )
+
+    model = model.to(device)
+    loss_fn = nn.MSELoss()
+    optimizer = Adam(model.parameters(), lr=learning_rate)
+    scheduler = ReduceLROnPlateau(optimizer, patience=50, factor=0.5)
+
+    best_val_loss = float("inf")
+    best_state = copy.deepcopy(model.state_dict())
+
+    for epoch in range(1, n_epochs + 1):
+        model.train()
+        for x_batch, y_batch in train_loader:
+            x_batch = x_batch.to(device)
+            y_batch = y_batch.to(device)
+            optimizer.zero_grad()
+            loss = loss_fn(model(x_batch), y_batch)
+            loss.backward()
+            optimizer.step()
+
+        model.eval()
+        val_loss = 0.0
+        with torch.no_grad():
+            for x_batch, y_batch in val_loader:
+                x_batch = x_batch.to(device)
+                y_batch = y_batch.to(device)
+                val_loss += loss_fn(model(x_batch), y_batch).item() * len(x_batch)
+        val_loss /= len(val_loader.dataset)
+        scheduler.step(val_loss)
+
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            best_state = copy.deepcopy(model.state_dict())
+
+        if verbose and (epoch == 1 or epoch == n_epochs or epoch % 100 == 0):
+            print(f"  epoch {epoch:4d} | val_loss={val_loss:.6f}")
+
+    model.load_state_dict(best_state)
+    model.best_val_loss = best_val_loss
+    return best_val_loss

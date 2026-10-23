@@ -98,3 +98,71 @@ def predict(model: nn.Module, x: torch.Tensor) -> torch.Tensor:
         x = x.unsqueeze(1)
     model.eval()
     return model(x)
+
+
+class ReLUNet(nn.Module):
+    """MLP with the same linear sizes as SIREN, using ReLU.
+
+    ReLU has no parameters of its own, so the parameter count matches a
+    SIREN of the same depth and width. Weights use PyTorch's default
+    initialization, which is the standard init for this activation.
+    Outside the training inputs a ReLU network extrapolates as a straight
+    line. It does not keep oscillating.
+    """
+
+    def __init__(
+        self,
+        in_features: int = 1,
+        hidden_dims: Optional[Sequence[int]] = None,
+        out_features: int = 1,
+    ) -> None:
+        super().__init__()
+        if hidden_dims is None:
+            hidden_dims = [256, 256, 256, 256]
+        layers: List[nn.Module] = []
+        prev = in_features
+        for dim in hidden_dims:
+            layers.append(nn.Linear(prev, dim))
+            layers.append(nn.ReLU())
+            prev = dim
+        layers.append(nn.Linear(prev, out_features))
+        self.net = nn.Sequential(*layers)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.net(x)
+
+    def count_parameters(self) -> int:
+        return sum(p.numel() for p in self.parameters() if p.requires_grad)
+
+
+class TanhNet(nn.Module):
+    """MLP with the same linear sizes as SIREN, using Tanh.
+
+    Parameter count matches a SIREN of the same depth and width. Weights
+    use PyTorch's default initialization. Tanh saturates, so far from the
+    training inputs the network stops oscillating and flattens.
+    """
+
+    def __init__(
+        self,
+        in_features: int = 1,
+        hidden_dims: Optional[Sequence[int]] = None,
+        out_features: int = 1,
+    ) -> None:
+        super().__init__()
+        if hidden_dims is None:
+            hidden_dims = [256, 256, 256, 256]
+        layers: List[nn.Module] = []
+        prev = in_features
+        for dim in hidden_dims:
+            layers.append(nn.Linear(prev, dim))
+            layers.append(nn.Tanh())
+            prev = dim
+        layers.append(nn.Linear(prev, out_features))
+        self.net = nn.Sequential(*layers)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        return self.net(x)
+
+    def count_parameters(self) -> int:
+        return sum(p.numel() for p in self.parameters() if p.requires_grad)
