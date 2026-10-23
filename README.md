@@ -100,7 +100,7 @@ Coverage includes sampling domain/strategies, dataset shapes, SIREN forward shap
 - **Period mismatch / multi-scale**: if the true \(f\) has very high-frequency content relative to \(\omega_0\) and width, fitting may need more capacity or longer training.
 - **Extrapolation drifts**: on this run, outside-only R² falls from 0.67 just beyond the training window to 0.49 on the far bands. Sine layers keep oscillating, but they are not locked to the unknown period.
 - **Placeholder \(f\)**: results on \(\sin x + 0.5\sin 2x\) are a proxy; the real black box may differ.
-- **No period discovery report**: we do not estimate \(T\) explicitly (by design — not hardcoded, not returned).
+- **No period discovery report**: we do not estimate \(T\) explicitly (by design - not hardcoded, not returned).
 
 ## What I would improve with more time
 
