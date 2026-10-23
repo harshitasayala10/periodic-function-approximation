@@ -116,7 +116,7 @@ pytest -q
 
 Coverage includes sampling domain and strategies, dataset shapes, SIREN forward shapes and initialization, a short training run, evaluation metrics, and the ablation helpers (matched parameter counts and finite zone scores).
 
-## Design choices (brief)
+## Design choices
 
 | Choice | Rationale |
 |--------|-----------|
@@ -133,7 +133,7 @@ Coverage includes sampling domain and strategies, dataset shapes, SIREN forward 
 - **Placeholder \(f\)**: results on \(\sin x + 0.5\sin 2x\) are a proxy; the real black box may differ.
 - **No period discovery report**: we do not estimate \(T\) explicitly (by design - not hardcoded, not returned).
 
-## What I would improve with more time
+## What I would improve
 
 - A learned input warp or post-hoc period estimate, checked only at analysis time, to stop the far-region drift. The ablation shows that sine layers and \(\omega_0 = 30\) help, and that the far-band error remains.
 - Hyperparameter search and early stopping with a held-out extrapolation split.
