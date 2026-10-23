@@ -109,7 +109,3 @@ Coverage includes sampling domain/strategies, dataset shapes, SIREN forward shap
 - Optional period estimation *post hoc* from predictions (analysis only, not baked into the model).
 - Hyperparameter search and early stopping with a held-out extrapolation split.
 - Packaging (`pyproject.toml`) and a small inference-only CLI that loads a checkpoint and never imports `black_box`.
-
-## When the real \(f\) arrives
-
-Edit only `src/black_box.py` — replace the body of `f` — then re-run `python run.py`.
