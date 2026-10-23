@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+.env
+
+outputs/checkpoints/*
+!outputs/checkpoints/.gitkeep
+outputs/plots/*
+!outputs/plots/.gitkeep
+!outputs/plots/siren_evaluation.png
+
+.DS_Store
