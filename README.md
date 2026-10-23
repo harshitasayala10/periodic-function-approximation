@@ -132,7 +132,6 @@ Coverage includes sampling domain and strategies, dataset shapes, SIREN forward 
 
 - **Period mismatch / multi-scale**: if the true \(f\) has very high-frequency content relative to \(\omega_0\) and width, fitting may need more capacity or longer training.
 - **Extrapolation drifts**: outside-only R² falls from 0.67 just beyond the training window to 0.49 on the far bands. At \(x = 1100\) the prediction has the wrong sign (\(-0.32\) versus \(0.82\)).
-- **This \(f\) is simple**: \(\sin x + 0.5\sin 2x\) has two frequencies. A target with sharper or less regular oscillations would be harder to fit, including inside the training window.
 - **No period discovery report**: we do not estimate \(T\) explicitly (by design - not hardcoded, not returned).
 
 ## What I would improve
